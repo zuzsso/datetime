@@ -1,18 +1,22 @@
 <?php
 
+/** @noinspection PhpUnused */
+
 declare(strict_types=1);
 
 namespace DateAndTime\Service;
 
 use DateAndTime\Exception\CronosImplementerUnmanagedException;
 use DateAndTime\Exception\NoStopwatchesInCollectionException;
+use DateAndTime\Exception\StopwatchAlreadyStoppedException;
 use DateAndTime\Exception\StopwatchIdAlreadyExistsException;
 use DateAndTime\Exception\StopwatchIdNotFoundException;
+use DateAndTime\Exception\StopwatchNeverStartedException;
+use DateAndTime\Exception\StopwatchNeverStoppedException;
 use DateAndTime\Type\Stopwatch;
-use DateAndTime\UseCase\Cronos;
 use Throwable;
 
-class CronosImplementer implements Cronos
+class Cronos
 {
     /**
      * @var Stopwatch[]
@@ -20,19 +24,21 @@ class CronosImplementer implements Cronos
     private static array $stopwatches = [];
 
     /**
-     * @inheritDoc
+     * @throws StopwatchIdAlreadyExistsException
      */
-    public function startTraceId(string $id, bool $start = true): void
+    public static function startTraceId(string $id, bool $start = true): void
     {
         $stopWatch = new Stopwatch($id, $start);
 
-        $this->addStopwatch($stopWatch);
+        self::addStopwatch($stopWatch);
     }
 
     /**
-     * @inheritDoc
+     * @throws StopwatchAlreadyStoppedException
+     * @throws NoStopwatchesInCollectionException
+     * @throws StopwatchIdNotFoundException
      */
-    public function stopTraceId(string $id): void
+    public static function stopTraceId(string $id): void
     {
         if (count(self::$stopwatches) === 0) {
             throw new NoStopwatchesInCollectionException("Can't stop stopwatch. Empty stopwatch collection");
@@ -50,9 +56,9 @@ class CronosImplementer implements Cronos
     }
 
     /**
-     * @inheritDoc
+     * @throws StopwatchIdNotFoundException
      */
-    public function getStopwatchById(string $id): Stopwatch
+    public static function getStopwatchById(string $id): Stopwatch
     {
         foreach (self::$stopwatches as $stopwatch) {
             if ($stopwatch->getId() === $id) {
@@ -66,7 +72,7 @@ class CronosImplementer implements Cronos
     /**
      * @throws StopwatchIdAlreadyExistsException
      */
-    private function addStopwatch(Stopwatch $s): void
+    private static function addStopwatch(Stopwatch $s): void
     {
         $stopwatchId = $s->getId();
 
@@ -80,9 +86,11 @@ class CronosImplementer implements Cronos
     }
 
     /**
-     * @inheritDoc
+     * @throws StopwatchNeverStartedException
+     * @throws StopwatchNeverStoppedException
+     * @throws NoStopwatchesInCollectionException
      */
-    public function dumpReportInSeconds(): string
+    public static function dumpReportInSeconds(): string
     {
         if (count(self::$stopwatches) === 0) {
             throw new NoStopwatchesInCollectionException("Empty stopwatch collection. Nothing to report");
@@ -101,9 +109,11 @@ class CronosImplementer implements Cronos
     }
 
     /**
-     * @inheritDoc
+     * @throws StopwatchNeverStartedException
+     * @throws StopwatchNeverStoppedException
+     * @throws NoStopwatchesInCollectionException
      */
-    public function dumpReportInMilliSeconds(): string
+    public static function dumpReportInMilliSeconds(): string
     {
         if (count(self::$stopwatches) === 0) {
             throw new NoStopwatchesInCollectionException("Empty stopwatch collection. Nothing to report");
@@ -122,9 +132,9 @@ class CronosImplementer implements Cronos
     }
 
     /**
-     * @inheritDoc
+     * @throws CronosImplementerUnmanagedException
      */
-    public function stopAllRunningTraces(): void
+    public static function stopAllRunningTraces(): void
     {
         try {
             foreach (self::$stopwatches as $sw) {

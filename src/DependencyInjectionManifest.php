@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace DateAndTime;
 
-use DateAndTime\Service\CronosImplementer;
-use DateAndTime\UseCase\Cronos;
+use DateAndTime\Service\Cronos;
 use DiManifest\AbstractDependencyInjection;
 use DateAndTime\Service\DateTimeComparator;
 use DateAndTime\Service\DateTimeFormatter;
@@ -26,7 +25,7 @@ class DependencyInjectionManifest extends AbstractDependencyInjection
     {
         return array_merge(
             [
-                Cronos::class => autowire(CronosImplementer::class),
+                Cronos::class => new Cronos(),
                 CompareDateTime::class => autowire(DateTimeComparator::class),
                 FormatDateTime::class => autowire(DateTimeFormatter::class),
                 ProvideDateTime::class => autowire(DateTimeProvider::class),
