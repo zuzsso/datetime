@@ -18,36 +18,36 @@ interface Cronos
     /**
      * @throws StopwatchIdAlreadyExistsException
      */
-    public static function startTraceId(string $id, bool $start = true): void;
+    public function startTraceId(string $id, bool $start = true): void;
 
     /**
      * @throws StopwatchAlreadyStoppedException
      * @throws NoStopwatchesInCollectionException
      * @throws StopwatchIdNotFoundException
      */
-    public static function stopTraceId(string $id): void;
+    public function stopTraceId(string $id): void;
 
     /**
      * @throws StopwatchIdNotFoundException
      */
-    public static function getStopwatchById(string $id): Stopwatch;
+    public function getStopwatchById(string $id): Stopwatch;
 
     /**
      * @throws StopwatchNeverStartedException
      * @throws StopwatchNeverStoppedException
      * @throws NoStopwatchesInCollectionException
      */
-    public static function dumpReportInSeconds(): string;
+    public function dumpReportInSeconds(): string;
 
     /**
      * @throws StopwatchNeverStartedException
      * @throws StopwatchNeverStoppedException
      * @throws NoStopwatchesInCollectionException
      */
-    public static function dumpReportInMilliSeconds(): string;
+    public function dumpReportInMilliSeconds(): string;
 
     /**
      * @throws CronosImplementerUnmanagedException
      */
-    public static function stopAllRunningTraces(): void;
+    public function stopAllRunningTraces(): void;
 }

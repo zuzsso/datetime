@@ -22,17 +22,17 @@ class CronosImplementer implements Cronos
     /**
      * @inheritDoc
      */
-    public static function startTraceId(string $id, bool $start = true): void
+    public function startTraceId(string $id, bool $start = true): void
     {
         $stopWatch = new Stopwatch($id, $start);
 
-        self::addStopwatch($stopWatch);
+        $this->addStopwatch($stopWatch);
     }
 
     /**
      * @inheritDoc
      */
-    public static function stopTraceId(string $id): void
+    public function stopTraceId(string $id): void
     {
         if (count(self::$stopwatches) === 0) {
             throw new NoStopwatchesInCollectionException("Can't stop stopwatch. Empty stopwatch collection");
@@ -52,7 +52,7 @@ class CronosImplementer implements Cronos
     /**
      * @inheritDoc
      */
-    public static function getStopwatchById(string $id): Stopwatch
+    public function getStopwatchById(string $id): Stopwatch
     {
         foreach (self::$stopwatches as $stopwatch) {
             if ($stopwatch->getId() === $id) {
@@ -66,7 +66,7 @@ class CronosImplementer implements Cronos
     /**
      * @throws StopwatchIdAlreadyExistsException
      */
-    private static function addStopwatch(Stopwatch $s): void
+    private function addStopwatch(Stopwatch $s): void
     {
         $stopwatchId = $s->getId();
 
@@ -82,7 +82,7 @@ class CronosImplementer implements Cronos
     /**
      * @inheritDoc
      */
-    public static function dumpReportInSeconds(): string
+    public function dumpReportInSeconds(): string
     {
         if (count(self::$stopwatches) === 0) {
             throw new NoStopwatchesInCollectionException("Empty stopwatch collection. Nothing to report");
@@ -103,7 +103,7 @@ class CronosImplementer implements Cronos
     /**
      * @inheritDoc
      */
-    public static function dumpReportInMilliSeconds(): string
+    public function dumpReportInMilliSeconds(): string
     {
         if (count(self::$stopwatches) === 0) {
             throw new NoStopwatchesInCollectionException("Empty stopwatch collection. Nothing to report");
@@ -124,7 +124,7 @@ class CronosImplementer implements Cronos
     /**
      * @inheritDoc
      */
-    public static function stopAllRunningTraces(): void
+    public function stopAllRunningTraces(): void
     {
         try {
             foreach (self::$stopwatches as $sw) {
