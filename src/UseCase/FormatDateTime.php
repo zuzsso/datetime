@@ -15,4 +15,11 @@ interface FormatDateTime
     public function fromMySqlDateTimeToImmutable(string $mysqlDateTime): DateTimeImmutable;
 
     public function fromImmutableToMySqlDateTime(DateTimeImmutable $d): string;
+
+    /**
+     * @throws DatetimeCommonOperationsUnmanagedException
+     */
+    public function fromMySqlDateToImmutable(string $mysqlDate): DateTimeImmutable;
+
+    public function fromImmutableToMySqlDate(DateTimeImmutable $d): string;
 }

@@ -6,11 +6,20 @@ namespace DateAndTime\Service;
 
 use DateAndTime\Exception\DatetimeCommonOperationsUnmanagedException;
 use DateAndTime\UseCase\FormatDateTime;
+use DateAndTime\UseCase\TransformDateTime;
 use DateTimeImmutable;
 
 class DateTimeFormatter implements FormatDateTime
 {
     private const MYSQL_DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+    private const MYSQL_DATE_FORMAT = 'Y-m-d';
+
+    private TransformDateTime $transformDateTime;
+
+    public function __construct(TransformDateTime $transformDateTime)
+    {
+        $this->transformDateTime = $transformDateTime;
+    }
 
     /**
      * @inheritDoc
@@ -31,5 +40,26 @@ class DateTimeFormatter implements FormatDateTime
     public function fromImmutableToMySqlDateTime(DateTimeImmutable $d): string
     {
         return $d->format(self::MYSQL_DATE_TIME_FORMAT);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function fromMySqlDateToImmutable(string $mysqlDate): DateTimeImmutable
+    {
+        $result = DateTimeImmutable::createFromFormat(self::MYSQL_DATE_FORMAT, $mysqlDate);
+
+        if ($result === false) {
+            throw new DatetimeCommonOperationsUnmanagedException(
+                "Could not convert literal '$mysqlDate' to Date time format " . self::MYSQL_DATE_FORMAT
+            );
+        }
+
+        return $this->transformDateTime->removeTime($result);
+    }
+
+    public function fromImmutableToMySqlDate(DateTimeImmutable $d): string
+    {
+        return $d->format(self::MYSQL_DATE_FORMAT);
     }
 }
