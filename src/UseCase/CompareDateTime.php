@@ -15,4 +15,6 @@ interface CompareDateTime
      * if $d1 < $d2. Negative otherwise.
      */
     public function getDifferenceInSeconds(DateTimeImmutable $d1, DateTimeImmutable $d2, bool $absolute = false): int;
+
+    public function equalsMySqlDateTimeFormat(DateTimeImmutable $d1, DateTimeImmutable $d2): bool;
 }

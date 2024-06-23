@@ -4,11 +4,19 @@ declare(strict_types=1);
 
 namespace DateAndTime\Service;
 
+use DateAndTime\UseCase\FormatDateTime;
 use DateTimeImmutable;
 use DateAndTime\UseCase\CompareDateTime;
 
 class DateTimeComparator implements CompareDateTime
 {
+    private FormatDateTime $formatDateTime;
+
+    public function __construct(FormatDateTime $formatDateTime)
+    {
+        $this->formatDateTime = $formatDateTime;
+    }
+
     /**
      * @inheritDoc
      */
@@ -24,5 +32,13 @@ class DateTimeComparator implements CompareDateTime
         }
 
         return $diff;
+    }
+
+    public function equalsMySqlDateTimeFormat(DateTimeImmutable $d1, DateTimeImmutable $d2): bool
+    {
+        $f1 = $this->formatDateTime->fromImmutableToMySqlDateTime($d1);
+        $f2 = $this->formatDateTime->fromImmutableToMySqlDateTime($d2);
+
+        return $f1 === $f2;
     }
 }
