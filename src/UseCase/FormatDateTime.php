@@ -22,4 +22,6 @@ interface FormatDateTime
     public function fromMySqlDateToImmutable(string $mysqlDate): DateTimeImmutable;
 
     public function fromImmutableToMySqlDate(DateTimeImmutable $d): string;
+
+    public function fromImmutableToProjectId(DateTimeImmutable $d): int;
 }

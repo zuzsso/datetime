@@ -13,6 +13,7 @@ class DateTimeFormatter implements FormatDateTime
 {
     private const MYSQL_DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private const MYSQL_DATE_FORMAT = 'Y-m-d';
+    private const PROJECT_ID_FORMAT = 'YmdHis';
 
     private TransformDateTime $transformDateTime;
 
@@ -61,5 +62,10 @@ class DateTimeFormatter implements FormatDateTime
     public function fromImmutableToMySqlDate(DateTimeImmutable $d): string
     {
         return $d->format(self::MYSQL_DATE_FORMAT);
+    }
+
+    public function fromImmutableToProjectId(DateTimeImmutable $d): int
+    {
+        return (int)$d->format(self::PROJECT_ID_FORMAT);
     }
 }
