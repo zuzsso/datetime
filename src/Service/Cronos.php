@@ -83,7 +83,11 @@ class Cronos
             throw new RuntimeException("Empty stopwatch collection");
         }
 
-        return self::$stopwatches[0];
+        $keys = array_keys(self::$stopwatches);
+
+        $firstKey = $keys[0];
+
+        return self::$stopwatches[$firstKey];
     }
 
     public static function dumpReportInSeconds(): string
