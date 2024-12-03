@@ -119,7 +119,7 @@ class Stopwatch
         }
 
         foreach ($this->children as $c) {
-            $result .= $c->dumpReportRecursively($nestLevel++, $format);
+            $result .= $c->dumpReportRecursively(++$nestLevel, $format);
         }
 
         return $result;
