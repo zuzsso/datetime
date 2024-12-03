@@ -64,13 +64,13 @@ class Stopwatch
         $this->stop = new DateTimeImmutable();
     }
 
-    private function getTimeLapseInSeconds(): float
+    public function getTimeLapseInSeconds(): float
     {
         $millis = $this->getTimeLapseInMilliseconds();
         return round(((float)$millis) / 1000.0, 2);
     }
 
-    private function getTimeLapseInMilliseconds(): int
+    public function getTimeLapseInMilliseconds(): int
     {
         if ($this->stop === null) {
             throw new RuntimeException("Stopwatch never stopped. ID = " . $this->id);
