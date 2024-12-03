@@ -6,58 +6,53 @@ declare(strict_types=1);
 
 namespace DateAndTime\Service;
 
-use DateAndTime\Exception\CronosImplementerUnmanagedException;
-use DateAndTime\Exception\NoStopwatchesInCollectionException;
-use DateAndTime\Exception\StopwatchAlreadyStoppedException;
-use DateAndTime\Exception\StopwatchIdAlreadyExistsException;
-use DateAndTime\Exception\StopwatchIdNotFoundException;
-use DateAndTime\Exception\StopwatchNeverStartedException;
-use DateAndTime\Exception\StopwatchNeverStoppedException;
 use DateAndTime\Type\Stopwatch;
-use Throwable;
+use RuntimeException;
 
 class Cronos
 {
-    /**
-     * @var Stopwatch[]
-     */
+    /** @var Stopwatch[] */
     private static array $stopwatches = [];
 
-    /**
-     * @throws StopwatchIdAlreadyExistsException
-     */
-    public static function startTraceId(string $id, bool $start = true): void
+    public static function startTraceId(?string $parentId, string $id): void
     {
-        $stopWatch = new Stopwatch($id, $start);
+        if (($parentId === null) && (count(self::$stopwatches) === 0)) {
+            // Legit case. No stopwatches added yet, and the first one is the parent
+            self::addStopwatch(new Stopwatch($id));
+        }
 
-        self::addStopwatch($stopWatch);
+        if (($parentId === null) && (count(self::$stopwatches) > 0)) {
+            throw new RuntimeException('The trace has already begun. Please specify a parent for this stopwatch');
+        }
+
+        if (($parentId !== null) && (count(self::$stopwatches) > 0)) {
+            // Legit case. There are already stopwatches added, and this one is not the parent one
+            $parentStopwatch = self::$stopwatches[$parentId] ?? null;
+            if ($parentStopwatch === null) {
+                throw new RuntimeException("Parent Stopwatch ID not found: $parentId");
+            }
+
+            $newStopwatch = new Stopwatch($id);
+            self::addStopwatch($newStopwatch);
+            $parentStopwatch->addChild($newStopwatch);
+        }
+
+        if (($parentId !== null) && (count(self::$stopwatches) === 0)) {
+            throw new RuntimeException("The trace hasn't begun yet, so the first stopwatch must not have parent");
+        }
     }
 
-    /**
-     * @throws StopwatchAlreadyStoppedException
-     * @throws NoStopwatchesInCollectionException
-     * @throws StopwatchIdNotFoundException
-     */
     public static function stopTraceId(string $id): void
     {
-        if (count(self::$stopwatches) === 0) {
-            throw new NoStopwatchesInCollectionException("Can't stop stopwatch. Empty stopwatch collection");
+        $stopwatch = self::$stopwatches[$id] ?? null;
+
+        if ($stopwatch === null) {
+            throw new RuntimeException("Stopwatch ID not found: $id");
         }
 
-        foreach (self::$stopwatches as $stopwatch) {
-            $thisId = $stopwatch->getId();
-            if ($thisId === $id) {
-                $stopwatch->stop();
-                return;
-            }
-        }
-
-        throw new StopwatchIdNotFoundException("Stopwatch ID not found: $id");
+        $stopwatch->stop();
     }
 
-    /**
-     * @throws StopwatchIdNotFoundException
-     */
     public static function getStopwatchById(string $id): Stopwatch
     {
         foreach (self::$stopwatches as $stopwatch) {
@@ -66,84 +61,38 @@ class Cronos
             }
         }
 
-        throw new StopwatchIdNotFoundException("Stopwatch ID not found: $id");
+        throw new RuntimeException("Stopwatch ID not found: $id");
     }
 
-    /**
-     * @throws StopwatchIdAlreadyExistsException
-     */
     private static function addStopwatch(Stopwatch $s): void
     {
         $stopwatchId = $s->getId();
 
         foreach (self::$stopwatches as $stopwatch) {
             if ($stopwatch->getId() === $stopwatchId) {
-                throw new StopwatchIdAlreadyExistsException("Stopwatch already exists: ID: " . $stopwatchId);
+                throw new RuntimeException("Stopwatch already exists: ID: " . $stopwatchId);
             }
         }
 
         self::$stopwatches[] = $s;
     }
 
-    /**
-     * @throws StopwatchNeverStartedException
-     * @throws StopwatchNeverStoppedException
-     * @throws NoStopwatchesInCollectionException
-     */
+    private static function getMainStopwatch(): Stopwatch
+    {
+        if (count(self::$stopwatches) === 0) {
+            throw new RuntimeException("Empty stopwatch collection");
+        }
+
+        return self::$stopwatches[0];
+    }
+
     public static function dumpReportInSeconds(): string
     {
-        if (count(self::$stopwatches) === 0) {
-            throw new NoStopwatchesInCollectionException("Empty stopwatch collection. Nothing to report");
-        }
-
-        $report = '';
-
-        foreach (self::$stopwatches as $stopwatch) {
-            $timelapse = $stopwatch->getTimeLapseInSeconds();
-            $id = $stopwatch->getId();
-
-            $report .= ("$id -> $timelapse (s)" . PHP_EOL);
-        }
-
-        return $report;
+        return self::getMainStopwatch()->dumpReportInSeconds();
     }
 
-    /**
-     * @throws StopwatchNeverStartedException
-     * @throws StopwatchNeverStoppedException
-     * @throws NoStopwatchesInCollectionException
-     */
     public static function dumpReportInMilliSeconds(): string
     {
-        if (count(self::$stopwatches) === 0) {
-            throw new NoStopwatchesInCollectionException("Empty stopwatch collection. Nothing to report");
-        }
-
-        $report = '';
-
-        foreach (self::$stopwatches as $stopwatch) {
-            $timelapse = $stopwatch->getTimeLapseInMilliseconds();
-            $id = $stopwatch->getId();
-
-            $report .= ("$id -> $timelapse (ms)" . PHP_EOL);
-        }
-
-        return $report;
-    }
-
-    /**
-     * @throws CronosImplementerUnmanagedException
-     */
-    public static function stopAllRunningTraces(): void
-    {
-        try {
-            foreach (self::$stopwatches as $sw) {
-                if ($sw->isRunning()) {
-                    $sw->stop();
-                }
-            }
-        } catch (Throwable $t) {
-            throw new CronosImplementerUnmanagedException($t->getMessage(), $t->getCode(), $t);
-        }
+        return self::getMainStopwatch()->dumpReportInMilliseconds();
     }
 }

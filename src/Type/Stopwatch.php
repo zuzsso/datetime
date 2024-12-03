@@ -5,85 +5,75 @@ declare(strict_types=1);
 namespace DateAndTime\Type;
 
 use DateTimeImmutable;
-use LogicException;
-use DateAndTime\Exception\StopwatchAlreadyStartedException;
-use DateAndTime\Exception\StopwatchAlreadyStoppedException;
-use DateAndTime\Exception\StopwatchNeverStartedException;
-use DateAndTime\Exception\StopwatchNeverStoppedException;
+use RuntimeException;
 
 class Stopwatch
 {
     private string $id;
 
-    private ?DateTimeImmutable $start = null;
+    private DateTimeImmutable $start;
 
     private ?DateTimeImmutable $stop = null;
 
-    public function __construct(string $id, bool $start = true)
+    /** @var Stopwatch[] */
+    private array $children = [];
+
+    public function __construct(string $id)
     {
         $this->id = $id;
 
-        if ($start) {
-            $this->start = new DateTimeImmutable();
-        }
+        $this->start = new DateTimeImmutable();
     }
 
-    /**
-     * @return string
-     */
+    public function addChild(Stopwatch $child): void
+    {
+        $childId = $child->getId();
+        $thisId = $this->getId();
+
+        $existingChild = $this->children[$childId] ?? null;
+
+        if ($existingChild === null) {
+            $this->children[$childId] = $child;
+        }
+
+        throw new RuntimeException("Stopwatch '$childId' is already a child of stopwatch '$thisId'");
+    }
+
     public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @throws StopwatchAlreadyStartedException
-     */
-    public function start(): void
-    {
-        if ($this->start === null) {
-            $this->start = new DateTimeImmutable();
-            return;
-        }
-
-        throw new StopwatchAlreadyStartedException("Stopwatch already started. ID = " . $this->id);
-    }
-
-    /**
-     * @throws StopwatchAlreadyStoppedException
-     */
     public function stop(): void
     {
-        if ($this->stop === null) {
-            $this->stop = new DateTimeImmutable();
-            return;
+        if ($this->stop !== null) {
+            throw new RuntimeException("Stopwatch already stopped. ID = " . $this->id);
         }
 
-        throw new StopwatchAlreadyStoppedException("Stopwatch already stopped. ID = " . $this->id);
+        foreach ($this->children as $c) {
+            if ($c->isRunning()) {
+                $thisId = $this->getId();
+                $childId = $c->getId();
+
+                throw new RuntimeException(
+                    "Cannot stop '$thisId' because at least one child is still running: '$childId'"
+                );
+            }
+        }
+
+        $this->stop = new DateTimeImmutable();
     }
 
-    /**
-     * @throws StopwatchNeverStartedException
-     * @throws StopwatchNeverStoppedException
-     */
-    public function getTimeLapseInSeconds(): float
+    private function getTimeLapseInSeconds(): float
     {
         $millis = $this->getTimeLapseInMilliseconds();
-        return $millis / 1000;
+        return round(((float)$millis) / 1000.0, 2);
     }
 
-    /**
-     * @throws StopwatchNeverStartedException
-     * @throws StopwatchNeverStoppedException
-     */
-    public function getTimeLapseInMilliseconds(): int
+    private function getTimeLapseInMilliseconds(): int
     {
-        if ($this->start === null) {
-            throw new StopwatchNeverStartedException("Stopwatch never started. ID = " . $this->id);
-        }
-
         if ($this->stop === null) {
-            throw new StopwatchNeverStoppedException("Stopwatch never stopped. ID = " . $this->id);
+            throw new RuntimeException("Stopwatch never stopped. ID = " . $this->id);
         }
 
         $s = (int)$this->start->format('Uv');
@@ -92,7 +82,7 @@ class Stopwatch
         $interval = $e - $s;
 
         if ($interval < 0) {
-            throw new LogicException("Time difference unexpected to be negative: " . $interval);
+            throw new RuntimeException("Time difference unexpected to be negative: " . $interval);
         }
 
         return $interval;
@@ -100,6 +90,47 @@ class Stopwatch
 
     public function isRunning(): bool
     {
-        return (($this->start !== null) && ($this->stop === null));
+        return ($this->stop === null);
+    }
+
+    /**
+     * $format = 0 means "in seconds"
+     * $format = 1 means "in milliseconds"
+     */
+    private function dumpReportRecursively(int $nestLevel, int $format): string
+    {
+        $result = '';
+
+        $indentSize = 3;
+
+        $indentation = str_pad('', ($nestLevel * $indentSize) - 1, ' ', STR_PAD_LEFT);
+
+        $id = $this->getId();
+
+        if ($format === 0) {
+            $timelapse = $this->getTimeLapseInSeconds();
+            $result .= ("$indentation-> $id : $timelapse (s)" . PHP_EOL);
+        } elseif ($format === 1) {
+            $timelapse = $this->getTimeLapseInMilliseconds();
+            $result .= ("$indentation-> $id : $timelapse (ms)" . PHP_EOL);
+        } else {
+            throw new RuntimeException("Unrecognized timelapse units");
+        }
+
+        foreach ($this->children as $c) {
+            $result .= $c->dumpReportRecursively($nestLevel++, $format);
+        }
+
+        return $result;
+    }
+
+    public function dumpReportInSeconds(): string
+    {
+        return $this->dumpReportRecursively(0, 0);
+    }
+
+    public function dumpReportInMilliseconds(): string
+    {
+        return $this->dumpReportRecursively(0, 1);
     }
 }
