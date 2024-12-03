@@ -8,6 +8,7 @@ namespace DateAndTime\Service;
 
 use DateAndTime\Type\Stopwatch;
 use RuntimeException;
+use Throwable;
 
 class Cronos
 {
@@ -46,37 +47,34 @@ class Cronos
 
     public static function stopTraceId(string $id): void
     {
-        $stopwatch = self::$stopwatches[$id] ?? null;
-
-        if ($stopwatch === null) {
-            throw new RuntimeException("Stopwatch ID not found: $id");
-        }
+        $stopwatch = self::getStopwatchById($id);
 
         $stopwatch->stop();
     }
 
     public static function getStopwatchById(string $id): Stopwatch
     {
-        foreach (self::$stopwatches as $stopwatch) {
-            if ($stopwatch->getId() === $id) {
-                return $stopwatch;
-            }
+        $stopwatch = self::$stopwatches[$id] ?? null;
+
+        if ($stopwatch === null) {
+            throw new RuntimeException("Stopwatch ID not found: $id");
         }
 
-        throw new RuntimeException("Stopwatch ID not found: $id");
+        return $stopwatch;
     }
 
     private static function addStopwatch(Stopwatch $s): void
     {
         $stopwatchId = $s->getId();
-
-        foreach (self::$stopwatches as $stopwatch) {
-            if ($stopwatch->getId() === $stopwatchId) {
-                throw new RuntimeException("Stopwatch already exists: ID: " . $stopwatchId);
-            }
+        try {
+            self::getStopwatchById($stopwatchId);
+        } catch (Throwable $t) {
+            // Stopwatch does not exist, so it can be added
+            self::$stopwatches[$stopwatchId] = $s;
+            return;
         }
 
-        self::$stopwatches[] = $s;
+        throw new RuntimeException("Another stopwatch with the same id already exists: $stopwatchId");
     }
 
     private static function getMainStopwatch(): Stopwatch
