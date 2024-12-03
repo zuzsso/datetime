@@ -34,6 +34,7 @@ class Stopwatch
 
         if ($existingChild === null) {
             $this->children[$childId] = $child;
+            return;
         }
 
         throw new RuntimeException("Stopwatch '$childId' is already a child of stopwatch '$thisId'");

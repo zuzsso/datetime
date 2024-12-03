@@ -19,6 +19,7 @@ class Cronos
         if (($parentId === null) && (count(self::$stopwatches) === 0)) {
             // Legit case. No stopwatches added yet, and the first one is the parent
             self::addStopwatch(new Stopwatch($id));
+            return;
         }
 
         if (($parentId === null) && (count(self::$stopwatches) > 0)) {
@@ -35,6 +36,7 @@ class Cronos
             $newStopwatch = new Stopwatch($id);
             self::addStopwatch($newStopwatch);
             $parentStopwatch->addChild($newStopwatch);
+            return;
         }
 
         if (($parentId !== null) && (count(self::$stopwatches) === 0)) {
