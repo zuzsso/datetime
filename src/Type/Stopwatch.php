@@ -118,7 +118,7 @@ class Stopwatch
             throw new RuntimeException("Unrecognized timelapse units");
         }
 
-        $newNestLevel = $nestLevel++;
+        $newNestLevel = ++$nestLevel;
 
         foreach ($this->children as $c) {
             $result .= $c->dumpReportRecursively($newNestLevel, $format);
