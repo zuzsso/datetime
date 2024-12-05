@@ -38,10 +38,6 @@ class Cronos
             $parentId = $parent->getId();
             $parentStopwatch = self::getStopwatchById($parentId);
 
-            if ($parentStopwatch === null) {
-                throw new RuntimeException("The stopwatch '$parentId' has not been added yet to this collection");
-            }
-
             $newStopwatch = new Stopwatch($id);
             self::addStopwatch($newStopwatch);
             $parentStopwatch->addChild($newStopwatch);
@@ -54,16 +50,18 @@ class Cronos
     {
         $stopwatch = self::getStopwatchById($id);
 
-        if ($stopwatch === null) {
-            throw new RuntimeException("Stopwatch not found: $id");
-        }
-
         $stopwatch->stop();
     }
 
-    public static function getStopwatchById(string $id): ?Stopwatch
+    public static function getStopwatchById(string $id): Stopwatch
     {
-        return self::$stopwatches[$id] ?? null;
+        $stopwatch = self::$stopwatches[$id] ?? null;
+
+        if ($stopwatch === null) {
+            throw new RuntimeException("Stopwatch ID not found: $id");
+        }
+
+        return $stopwatch;
     }
 
     private static function addStopwatch(Stopwatch $s): void
