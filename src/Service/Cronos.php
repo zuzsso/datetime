@@ -15,16 +15,21 @@ class Cronos
     /** @var Stopwatch[] */
     private static array $stopwatches = [];
 
-    public static function startTraceId(?string $parentId, string $id): void
+    public static function startTraceId(?string $parentId, string $id): Stopwatch
     {
-        if (($parentId === null) && (count(self::$stopwatches) === 0)) {
-            // Legit case. No stopwatches added yet, and the first one is the parent
-            self::addStopwatch(new Stopwatch($id));
-            return;
-        }
-
         if (($parentId === null) && (count(self::$stopwatches) > 0)) {
             throw new RuntimeException('The trace has already begun. Please specify a parent for this stopwatch');
+        }
+
+        if (($parentId !== null) && (count(self::$stopwatches) === 0)) {
+            throw new RuntimeException("The trace hasn't begun yet, so the first stopwatch must not have parent");
+        }
+
+        $newStopWatch = new Stopwatch($id);
+
+        if (($parentId === null) && (count(self::$stopwatches) === 0)) {
+            // Legit case. No stopwatches added yet, and the first one is the parent
+            self::addStopwatch($newStopWatch);
         }
 
         if (($parentId !== null) && (count(self::$stopwatches) > 0)) {
@@ -37,12 +42,9 @@ class Cronos
             $newStopwatch = new Stopwatch($id);
             self::addStopwatch($newStopwatch);
             $parentStopwatch->addChild($newStopwatch);
-            return;
+            return $newStopwatch;
         }
-
-        if (($parentId !== null) && (count(self::$stopwatches) === 0)) {
-            throw new RuntimeException("The trace hasn't begun yet, so the first stopwatch must not have parent");
-        }
+        throw new RuntimeException("Unexpected case scenario");
     }
 
     public static function stopTraceId(string $id): void
