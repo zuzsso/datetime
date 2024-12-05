@@ -15,28 +15,31 @@ class Cronos
     /** @var Stopwatch[] */
     private static array $stopwatches = [];
 
-    public static function startTraceId(?string $parentId, string $id): Stopwatch
+    public static function startTraceId(?Stopwatch $parent, string $id): Stopwatch
     {
-        if (($parentId === null) && (count(self::$stopwatches) > 0)) {
+        if (($parent === null) && (count(self::$stopwatches) > 0)) {
             throw new RuntimeException('The trace has already begun. Please specify a parent for this stopwatch');
         }
 
-        if (($parentId !== null) && (count(self::$stopwatches) === 0)) {
+        if (($parent !== null) && (count(self::$stopwatches) === 0)) {
             throw new RuntimeException("The trace hasn't begun yet, so the first stopwatch must not have parent");
         }
 
         $newStopWatch = new Stopwatch($id);
 
-        if (($parentId === null) && (count(self::$stopwatches) === 0)) {
+        if (($parent === null) && (count(self::$stopwatches) === 0)) {
             // Legit case. No stopwatches added yet, and the first one is the parent
             self::addStopwatch($newStopWatch);
         }
 
-        if (($parentId !== null) && (count(self::$stopwatches) > 0)) {
+        if (($parent !== null) && (count(self::$stopwatches) > 0)) {
             // Legit case. There are already stopwatches added, and this one is not the parent one
-            $parentStopwatch = self::$stopwatches[$parentId] ?? null;
+
+            $parentId = $parent->getId();
+            $parentStopwatch = self::getStopwatchById($parentId);
+
             if ($parentStopwatch === null) {
-                throw new RuntimeException("Parent Stopwatch ID not found: $parentId");
+                throw new RuntimeException("The stopwatch '$parentId' has not been added yet to this collection");
             }
 
             $newStopwatch = new Stopwatch($id);
@@ -51,18 +54,16 @@ class Cronos
     {
         $stopwatch = self::getStopwatchById($id);
 
+        if ($stopwatch === null) {
+            throw new RuntimeException("Stopwatch not found: $id");
+        }
+
         $stopwatch->stop();
     }
 
-    public static function getStopwatchById(string $id): Stopwatch
+    public static function getStopwatchById(string $id): ?Stopwatch
     {
-        $stopwatch = self::$stopwatches[$id] ?? null;
-
-        if ($stopwatch === null) {
-            throw new RuntimeException("Stopwatch ID not found: $id");
-        }
-
-        return $stopwatch;
+        return self::$stopwatches[$id] ?? null;
     }
 
     private static function addStopwatch(Stopwatch $s): void
