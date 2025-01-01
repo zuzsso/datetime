@@ -24,4 +24,9 @@ interface FormatDateTime
     public function fromImmutableToMySqlDate(DateTimeImmutable $d): string;
 
     public function fromImmutableToProjectId(DateTimeImmutable $d): int;
+
+    /**
+     * @throws DatetimeCommonOperationsUnmanagedException
+     */
+    public function fromStringToIso8601(string $dateAsString): DateTimeImmutable;
 }

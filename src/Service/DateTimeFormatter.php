@@ -14,6 +14,7 @@ class DateTimeFormatter implements FormatDateTime
     private const MYSQL_DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private const MYSQL_DATE_FORMAT = 'Y-m-d';
     private const PROJECT_ID_FORMAT = 'YmdHis';
+    private const ISO_8601 = 'Y-m-d\TH:i:sO';
 
     private TransformDateTime $transformDateTime;
 
@@ -67,5 +68,21 @@ class DateTimeFormatter implements FormatDateTime
     public function fromImmutableToProjectId(DateTimeImmutable $d): int
     {
         return (int)$d->format(self::PROJECT_ID_FORMAT);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function fromStringToIso8601(string $dateAsString): DateTimeImmutable
+    {
+        $result = DateTimeImmutable::createFromFormat(self::ISO_8601, $dateAsString);
+
+        if ($result === false) {
+            throw new DatetimeCommonOperationsUnmanagedException(
+                "Could not convert literal '$dateAsString' to Date time format " . self::ISO_8601
+            );
+        }
+
+        return $result;
     }
 }
