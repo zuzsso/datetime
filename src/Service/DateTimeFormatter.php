@@ -85,4 +85,9 @@ class DateTimeFormatter implements FormatDateTime
 
         return $result;
     }
+
+    public function fromImmutableToIso8601(DateTimeImmutable $d): string
+    {
+        return $d->format(self::ISO_8601);
+    }
 }

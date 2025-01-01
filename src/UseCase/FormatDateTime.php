@@ -29,4 +29,6 @@ interface FormatDateTime
      * @throws DatetimeCommonOperationsUnmanagedException
      */
     public function fromStringToIso8601(string $dateAsString): DateTimeImmutable;
+
+    public function fromImmutableToIso8601(DateTimeImmutable $d): string;
 }
