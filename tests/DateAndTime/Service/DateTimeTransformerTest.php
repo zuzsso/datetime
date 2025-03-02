@@ -7,8 +7,8 @@ namespace DateAndTime\Tests\DateAndTime\Service;
 use DateAndTime\Tests\CustomTestCase;
 use DateTimeImmutable;
 use DateTimeInterface;
-use DateAndTime\Exception\DatetimeCommonOperationsUnmanagedException;
 use DateAndTime\Service\DateTimeTransformer;
+use RuntimeException;
 
 class DateTimeTransformerTest extends CustomTestCase
 {
@@ -31,9 +31,6 @@ class DateTimeTransformerTest extends CustomTestCase
         self::assertEquals('2005-08-15T00:00:00+12:34', $actualFormatted);
     }
 
-    /**
-     * @throws DatetimeCommonOperationsUnmanagedException
-     */
     public function testCorrectlyAddsDaysToDate(): void
     {
         $fixture = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2024-02-04 21:26:00');
@@ -43,9 +40,6 @@ class DateTimeTransformerTest extends CustomTestCase
         self::assertEquals('2024-02-07 21:26:00', $actual->format('Y-m-d H:i:s'));
     }
 
-    /**
-     * @throws DatetimeCommonOperationsUnmanagedException
-     */
     public function testCorrectlySubtractsDaysToDate(): void
     {
         $fixture = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2024-02-04 21:26:00');
@@ -55,9 +49,6 @@ class DateTimeTransformerTest extends CustomTestCase
         self::assertEquals('2024-02-01 21:26:00', $actual->format('Y-m-d H:i:s'));
     }
 
-    /**
-     * @throws DatetimeCommonOperationsUnmanagedException
-     */
     public function testCorrectlyAddsSecondsToDate(): void
     {
         $fixture = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2024-02-04 21:26:00');
@@ -67,9 +58,6 @@ class DateTimeTransformerTest extends CustomTestCase
         self::assertEquals('2024-02-04 21:26:03', $actual->format('Y-m-d H:i:s'));
     }
 
-    /**
-     * @throws DatetimeCommonOperationsUnmanagedException
-     */
     public function testCorrectlySubtractsSecondsToDate(): void
     {
         $fixture = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2024-02-04 21:26:00');
@@ -108,7 +96,7 @@ class DateTimeTransformerTest extends CustomTestCase
         DateTimeImmutable $dt,
         int $incorrectValue
     ): void {
-        $this->expectException(DatetimeCommonOperationsUnmanagedException::class);
+        $this->expectException(RuntimeException::class);
         $this->sut->$functionName($dt, $incorrectValue);
     }
 }

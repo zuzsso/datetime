@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DateAndTime\Tests\DateAndTime\Service;
 
 use DateAndTime\Tests\CustomTestCase;
+use DateAndTime\UseCase\FormatDateTime;
 use DateTimeImmutable;
 use DateTimeZone;
 use DateAndTime\Service\DateTimeComparator;
@@ -17,7 +18,9 @@ class DateTimeComparatorTest extends CustomTestCase
     {
         parent::setUp();
 
-        $this->sut = new DateTimeComparator();
+        $formatDateTime = $this->createMock(FormatDateTime::class);
+
+        $this->sut = new DateTimeComparator($formatDateTime);
     }
 
     public function returnsCorrectResultsDataProvider(): array

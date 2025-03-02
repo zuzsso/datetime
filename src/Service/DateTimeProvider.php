@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace DateAndTime\Service;
 
-use DateAndTime\Exception\DateTimeProviderUnmanagedException;
 use DateAndTime\UseCase\FormatDateTime;
 use DateTimeImmutable;
 use DateAndTime\UseCase\ProvideDateTime;
 use DOMDocument;
 use DOMNodeList;
 use DOMXPath;
+use RuntimeException;
 
 class DateTimeProvider implements ProvideDateTime
 {
@@ -43,7 +43,7 @@ class DateTimeProvider implements ProvideDateTime
         $nodeList = $xpath->query("//table//tr");
 
         if (!$nodeList instanceof DOMNodeList) {
-            throw new DateTimeProviderUnmanagedException("Could not get element table with formats");
+            throw new RuntimeException("Could not get element table with formats");
         }
 
         $iso8601Format = null;
@@ -66,7 +66,7 @@ class DateTimeProvider implements ProvideDateTime
         }
 
         if ($iso8601Format === null) {
-            throw new DateTimeProviderUnmanagedException("Could not get utc date from format list");
+            throw new RuntimeException("Could not get utc date from format list");
         }
 
         return $this->formatDateTime->fromStringToIso8601($iso8601Format);

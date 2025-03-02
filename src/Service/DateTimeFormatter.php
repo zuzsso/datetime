@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace DateAndTime\Service;
 
-use DateAndTime\Exception\DatetimeCommonOperationsUnmanagedException;
 use DateAndTime\UseCase\FormatDateTime;
 use DateAndTime\UseCase\TransformDateTime;
 use DateTimeImmutable;
+use RuntimeException;
 
 class DateTimeFormatter implements FormatDateTime
 {
@@ -31,7 +31,7 @@ class DateTimeFormatter implements FormatDateTime
         $result = DateTimeImmutable::createFromFormat(self::MYSQL_DATE_TIME_FORMAT, $mysqlDateTime);
 
         if ($result === false) {
-            throw new DatetimeCommonOperationsUnmanagedException(
+            throw new RuntimeException(
                 "Could not convert literal '$mysqlDateTime' to Date time format " . self::MYSQL_DATE_TIME_FORMAT
             );
         }
@@ -52,7 +52,7 @@ class DateTimeFormatter implements FormatDateTime
         $result = DateTimeImmutable::createFromFormat(self::MYSQL_DATE_FORMAT, $mysqlDate);
 
         if ($result === false) {
-            throw new DatetimeCommonOperationsUnmanagedException(
+            throw new RuntimeException(
                 "Could not convert literal '$mysqlDate' to Date time format " . self::MYSQL_DATE_FORMAT
             );
         }
@@ -78,7 +78,7 @@ class DateTimeFormatter implements FormatDateTime
         $result = DateTimeImmutable::createFromFormat(self::ISO_8601, $dateAsString);
 
         if ($result === false) {
-            throw new DatetimeCommonOperationsUnmanagedException(
+            throw new RuntimeException(
                 "Could not convert literal '$dateAsString' to Date time format " . self::ISO_8601
             );
         }

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace DateAndTime\Tests\DateAndTime\Service;
 
-use DateAndTime\Exception\DatetimeCommonOperationsUnmanagedException;
-use DateAndTime\Exception\DateTimeProviderUnmanagedException;
 use DateAndTime\Service\DateTimeFormatter;
 use DateAndTime\Service\DateTimeProvider;
 use DateAndTime\Service\DateTimeTransformer;
@@ -22,10 +20,6 @@ class DateTimeProviderTest extends TestCase
         $this->sut = new DateTimeProvider(new DateTimeFormatter(new DateTimeTransformer()));
     }
 
-    /**
-     * @throws DateTimeProviderUnmanagedException
-     * @throws DatetimeCommonOperationsUnmanagedException
-     */
     public function testConnectivity(): void
     {
         $this->sut->getExternalUtcDateTime();
