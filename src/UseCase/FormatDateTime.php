@@ -21,6 +21,4 @@ interface FormatDateTime
     public function fromStringToIso8601(string $dateAsString): DateTimeImmutable;
 
     public function fromImmutableToIso8601(DateTimeImmutable $d): string;
-
-    public function tranformImmutableToUtc(DateTimeImmutable$d): DateTimeImmutable;
 }

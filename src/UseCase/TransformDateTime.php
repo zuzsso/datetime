@@ -17,4 +17,6 @@ interface TransformDateTime
     public function addDays(DateTimeImmutable $d, int $days): DateTimeImmutable;
 
     public function addSeconds(DateTimeImmutable $d, int $seconds): DateTimeImmutable;
+
+    public function tranformImmutableToUtc(DateTimeImmutable$d): DateTimeImmutable;
 }

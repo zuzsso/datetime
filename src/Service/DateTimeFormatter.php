@@ -7,7 +7,6 @@ namespace DateAndTime\Service;
 use DateAndTime\UseCase\FormatDateTime;
 use DateAndTime\UseCase\TransformDateTime;
 use DateTimeImmutable;
-use DateTimeZone;
 use RuntimeException;
 
 class DateTimeFormatter implements FormatDateTime
@@ -81,10 +80,5 @@ class DateTimeFormatter implements FormatDateTime
     public function fromImmutableToIso8601(DateTimeImmutable $d): string
     {
         return $d->format(self::ISO_8601);
-    }
-
-    public function tranformImmutableToUtc(DateTimeImmutable $d): DateTimeImmutable
-    {
-        return $d->setTimezone(new DateTimeZone('UTC'));
     }
 }

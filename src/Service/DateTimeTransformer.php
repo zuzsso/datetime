@@ -7,6 +7,7 @@ namespace DateAndTime\Service;
 use DateInterval;
 use DateTimeImmutable;
 use DateAndTime\UseCase\TransformDateTime;
+use DateTimeZone;
 use RuntimeException;
 
 class DateTimeTransformer implements TransformDateTime
@@ -51,5 +52,10 @@ class DateTimeTransformer implements TransformDateTime
                 "This function requires a positive number of days and greater than 0 to substract. Provided: $value"
             );
         }
+    }
+
+    public function tranformImmutableToUtc(DateTimeImmutable $d): DateTimeImmutable
+    {
+        return $d->setTimezone(new DateTimeZone('UTC'));
     }
 }
