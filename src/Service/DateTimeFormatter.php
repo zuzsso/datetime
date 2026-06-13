@@ -7,6 +7,7 @@ namespace DateAndTime\Service;
 use DateAndTime\UseCase\FormatDateTime;
 use DateAndTime\UseCase\TransformDateTime;
 use DateTimeImmutable;
+use DateTimeZone;
 use RuntimeException;
 
 class DateTimeFormatter implements FormatDateTime
@@ -23,9 +24,6 @@ class DateTimeFormatter implements FormatDateTime
         $this->transformDateTime = $transformDateTime;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function fromMySqlDateTimeToImmutable(string $mysqlDateTime): DateTimeImmutable
     {
         $result = DateTimeImmutable::createFromFormat(self::MYSQL_DATE_TIME_FORMAT, $mysqlDateTime);
@@ -44,9 +42,6 @@ class DateTimeFormatter implements FormatDateTime
         return $d->format(self::MYSQL_DATE_TIME_FORMAT);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function fromMySqlDateToImmutable(string $mysqlDate): DateTimeImmutable
     {
         $result = DateTimeImmutable::createFromFormat(self::MYSQL_DATE_FORMAT, $mysqlDate);
@@ -70,9 +65,6 @@ class DateTimeFormatter implements FormatDateTime
         return (int)$d->format(self::PROJECT_ID_FORMAT);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function fromStringToIso8601(string $dateAsString): DateTimeImmutable
     {
         $result = DateTimeImmutable::createFromFormat(self::ISO_8601, $dateAsString);
@@ -89,5 +81,10 @@ class DateTimeFormatter implements FormatDateTime
     public function fromImmutableToIso8601(DateTimeImmutable $d): string
     {
         return $d->format(self::ISO_8601);
+    }
+
+    public function tranformImmutableToUtc(DateTimeImmutable $d): DateTimeImmutable
+    {
+        return $d->setTimezone(new DateTimeZone('UTC'));
     }
 }
